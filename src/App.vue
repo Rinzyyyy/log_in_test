@@ -2,18 +2,8 @@
 import { ref, computed, watch } from 'vue'
 import data from './assets/data.json'
 
-const account = ref(null)
-const password = ref(null)
-const wrongHint = ref('hide')
-const clock = ref(Date.now())
-const mode = ref('left')
-const modeChcked = ref(false)
-const back = ref(null)
-const button = ref(null)
-const a = ref(null)
-const p = ref(null)
+//語言切換
 const lang = ref('en')
-
 let enter = data[lang.value].account
 let pass_word = data[lang.value].password
 let forget = data[lang.value].forgot
@@ -36,13 +26,21 @@ watch(lang, (newlang) => {
   err = data[newlang].error
 })
 
+//set clock
+const clock = ref(Date.now())
+
 setInterval(() => {
   clock.value = Date.now()
 }, 1000)
 
 const now = computed(() => {
-  return new Date(clock.value).toString().slice(0, -8)
+  return new Date(clock.value).toLocaleString('en-US', { hour12: false }).replace(',', '_')
 })
+
+//登入設定
+const account = ref(null)
+const password = ref(null)
+const wrongHint = ref('hide')
 
 function accese() {
   if (account.value === 'abc123' && password.value === 'abc123') {
@@ -55,16 +53,30 @@ function accese() {
   }
 }
 
+//切換深淺顏色模式
+const mode = ref('left')
+const modeChcked = ref(false)
+const moon = ref('hide')
+const sun = ref('showSun')
+const back = ref(null)
+const button = ref(null)
+const a = ref(null)
+const p = ref(null)
+
 function modeSwitch() {
   modeChcked.value = !modeChcked.value
   if (!modeChcked.value) {
     mode.value = 'left'
+    sun.value = 'showSun'
+    moon.value = 'hide'
     back.value = ''
     button.value = ''
     a.value = ''
     p.value = ''
   } else {
     mode.value = 'right'
+    sun.value = 'hide'
+    moon.value = 'showMoon'
     back.value = 'blackmode_back'
     button.value = 'blackmode_button'
     a.value = 'blackmode_a'
@@ -76,7 +88,6 @@ function modeSwitch() {
 <template>
   <div class="back" :class="back">
     <nav>
-      <label>Mode</label>
       <button
         :class="button"
         type="button"
@@ -85,13 +96,17 @@ function modeSwitch() {
         class="switch"
         @click="modeSwitch"
       >
+        <span :class="sun"><font-awesome-icon :icon="['fass', 'sun']" /></span>
         <span :class="mode">Ｏ</span>
+        <span :class="moon"><font-awesome-icon :icon="['fass', 'moon']" size="xs" /></span>
       </button>
 
-      <select v-model="lang">
+      <span><font-awesome-icon :icon="['fass', 'globe']" /></span>
+      <select :class="button" v-model="lang">
         <option value="en">US</option>
         <option value="cn">中文</option>
       </select>
+      <span class="arrow"><font-awesome-icon :icon="['fas', 'angle-down']" /></span>
     </nav>
     <header>
       <img class="logo" src="./assets/logo.svg" alt="logo" />
@@ -120,7 +135,15 @@ function modeSwitch() {
 </template>
 
 <style scoped>
-* {
+div,
+section,
+head,
+main,
+select,
+button {
+  -appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
   transition: all 0.5s ease-in-out;
 }
 .time {
@@ -152,6 +175,7 @@ section {
   background-color: rgba(224, 222, 219, 0.3);
   width: 20rem;
   padding: 1rem 1.5rem;
+  margin-bottom: 0.7rem;
 }
 .logo {
   height: 9vh;
@@ -190,40 +214,68 @@ div {
   align-items: center;
   color: rgb(113, 115, 116);
 }
+
 .hide {
   display: none;
 }
 .show {
   display: block;
-  color: red;
+  color: rgb(253, 60, 60);
   align-self: flex-start;
   margin: 0 0 1rem 0;
 }
+
+nav {
+  display: flex;
+  padding: 0.9rem 0 0 1rem;
+  align-items: center;
+}
 .switch {
-  width: 2.5rem;
+  margin: 0 1rem 0 0;
+  width: 2.8rem;
+  height: 1.3rem;
   padding: 0.01rem;
   border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .right {
-  font-size: 1rem;
-  padding-right: 2rem;
+  padding-right: 0.4rem;
+  font-size: 1.1rem;
 }
 .left {
-  font-size: 1rem;
-  padding-left: 1.2rem;
+  padding-left: 0.2rem;
+  font-size: 1.1rem;
+}
+.showSun {
+  display: block;
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+}
+.showMoon {
+  display: block;
+  margin-right: 0.5rem;
 }
 select {
   margin-left: 0.5rem;
-  width: 3.5rem;
+  width: 3.3rem;
   height: 1.2rem;
   padding: 0rem 0.5rem;
   font-size: 0.8rem;
-  background-color: rgb(223, 218, 218);
+  background-color: rgb(241, 237, 237);
   border: none;
   border-radius: 0.5rem;
 }
+.arrow {
+  position: absolute;
+  top: 1.1rem;
+  left: 8.5rem;
+  color: rgb(168, 167, 165);
+  pointer-events: none;
+}
 .blackmode_back {
-  background-color: rgb(32, 31, 31);
+  background-color: rgb(36, 35, 35);
   color: aliceblue;
 }
 .blackmode_p {
@@ -252,15 +304,21 @@ select {
   color: rgb(161, 158, 158);
 }
 
-@media (max-width: 300px) {
+@media (max-width: 330px) {
   section {
-    width: 18rem;
+    width: 16rem;
   }
   input {
     width: 15rem;
   }
   .time {
     text-align: center;
+  }
+  hr {
+    width: 7.5rem;
+  }
+  div {
+    overflow: hidden;
   }
 }
 </style>
